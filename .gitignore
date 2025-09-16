@@ -1,0 +1,16 @@
+# Игнорируем node_modules в корне и папках
+node_modules/
+server/node_modules/
+frontend/node_modules/
+
+# Игнорируем сборки
+server/dist/
+frontend/dist/
+
+# Логи и временные файлы
+*.log
+*.tmp
+
+# Environment variables
+.env
+.env.local

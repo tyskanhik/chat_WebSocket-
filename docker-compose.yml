@@ -1,0 +1,45 @@
+services:
+  # NestJS сервер
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    command: npm run start:dev
+    restart: unless-stopped
+    networks:
+      - chat-network
+    stdin_open: true
+    tty: true
+
+  # Angular фронтенд
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    environment:
+      - CHAT_API_URL=http://localhost:3000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm start -- --host 0.0.0.0 --poll 1000 --port 4200
+    restart: unless-stopped
+    networks:
+      - chat-network
+    depends_on:
+      - api
+    stdin_open: true
+    tty: true
+
+networks:
+  chat-network:
+    driver: bridge

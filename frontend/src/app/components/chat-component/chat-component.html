@@ -1,0 +1,119 @@
+<div class="chat-container">
+  <!-- Статус подключения -->
+  <div class="status" [class.connected]="isConnected()" [class.disconnected]="!isConnected()">
+    {{ isConnected() ? '✓ Подключено' : '✗ Отключено' }}
+    @if (!isConnected()) {
+      <button (click)="reconnect()" class="reconnect-btn">Переподключиться</button>
+    }
+  </div>
+
+  <!-- Ошибки -->
+  @if (error()) {
+    <div class="error-message">
+      <span>{{ error() }}</span>
+      <button (click)="clearError()" class="close-btn">×</button>
+    </div>
+  }
+
+  <!-- Экран ввода имени -->
+  @if (!currentUser()) {
+    <div class="login-screen">
+      <div class="login-card">
+        <div class="login-header">
+          <h2>Добро пожаловать в чат!</h2>
+          <p>Введите ваше имя, чтобы начать общение</p>
+        </div>
+        
+        <div class="input-group">
+          <input 
+            type="text" 
+            [ngModel]="username()" 
+            (ngModelChange)="username.set($event)"
+            placeholder="Ваше имя..."
+            maxlength="20"
+            (keyup.enter)="setUsername()"
+            class="username-input"
+            autocomplete="off"
+          >
+          <button 
+            (click)="setUsername()" 
+            [disabled]="!username().trim()"
+            class="join-button"
+          >
+            Войти в чат
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- Экран чата -->
+    <div class="chat-screen">
+      <!-- Заголовок чата -->
+      <div class="chat-header">
+        <div class="header-content">
+          <h2>Чат комнаты</h2>
+          <div class="header-actions">
+            <div class="user-info">
+              <span class="user-name">{{ currentUser() }}</span>
+              <span class="online-count">• Онлайн: {{ activeUsers().length }}</span>
+            </div>
+            <button (click)="logout()" class="logout-btn" title="Выйти из чата">
+              Выйти
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Область сообщений -->
+      <div #messagesContainer class="messages-container">
+        @for (msg of messages(); track trackByMessage($index, msg)) {
+          <div class="message" [class.system]="msg.username === 'System'">
+            @if (msg.username === 'System') {
+              <div class="system-message">
+                <span class="message-text">{{ msg.message }}</span>
+                <span class="message-time">{{ formatTimestamp(msg.timestamp) }}</span>
+              </div>
+            } @else {
+              <div class="user-message" [class.own-message]="msg.username === currentUser()">
+                <div class="message-header">
+                  <span class="username">{{ msg.username }}</span>
+                  <span class="time">{{ formatTimestamp(msg.timestamp) }}</span>
+                </div>
+                <div class="message-content">{{ msg.message }}</div>
+              </div>
+            }
+          </div>
+        }
+        
+        @if (messages().length === 0) {
+          <div class="empty-state">
+            <p>Пока нет сообщений</p>
+            <span>Напишите первое сообщение!</span>
+          </div>
+        }
+      </div>
+
+      <!-- Форма отправки сообщения -->
+      <div class="message-input-container">
+        <input 
+          type="text" 
+          [ngModel]="message()" 
+          (ngModelChange)="message.set($event)"
+          placeholder="Напишите сообщение..."
+          maxlength="500"
+          (keyup.enter)="sendMessage()"
+          class="message-input"
+          autocomplete="off"
+        >
+        <button 
+          (click)="sendMessage()" 
+          [disabled]="!message().trim()"
+          class="send-button"
+          title="Отправить сообщение"
+        >
+          📤
+        </button>
+      </div>
+    </div>
+  }
+</div>

@@ -64,7 +64,17 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    this.chatService.disconnect();
+    this.chatService.state.update(state => ({
+      ...state,
+      currentUser: null,
+      activeUsers: [],
+      messages: [],
+      error: null
+    }));
+
+    this.username.set('');
+    this.message.set('');
+  
     this.chatService.reconnect();
   }
 
